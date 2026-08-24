@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>审计流水 - LIMS</title>
+  <style>
+    body { font-family: "Microsoft YaHei", sans-serif; margin: 24px; }
+    h1 { font-size: 22px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>审计流水</h1>
+  <table id="audit">
+    <thead>
+      <tr><th>事件ID</th><th>类型</th><th>实体</th><th>操作人</th><th>时间</th><th>详情</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    async function load() {
+      const res = await fetch('/api/audit?limit=200');
+      const rows = await res.json();
+      const tbody = document.querySelector('#audit tbody');
+      tbody.innerHTML = '';
+      for (const e of rows) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + e.id + '</td><td>' + e.kind + '</td><td>' + e.entity_type + ':' + e.entity_id +
+          '</td><td>' + e.actor + '</td><td>' + e.at + '</td><td>' + e.detail + '</td>';
+        tbody.appendChild(tr);
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
