@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>报告签发台 - LIMS</title>
+  <style>
+    body { font-family: "Microsoft YaHei", sans-serif; margin: 24px; }
+    h1 { font-size: 22px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>报告签发台</h1>
+  <table id="reports">
+    <thead>
+      <tr><th>报告ID</th><th>样本</th><th>标题</th><th>版本</th><th>状态</th><th>文件</th><th>签发时间</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    async function load() {
+      const res = await fetch('/api/reports');
+      const rows = await res.json();
+      const tbody = document.querySelector('#reports tbody');
+      tbody.innerHTML = '';
+      for (const r of rows) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + r.id + '</td><td>' + r.sample_id + '</td><td>' + r.title +
+          '</td><td>' + r.version + '</td><td>' + r.status + '</td><td>' + (r.content_path || '-') +
+          '</td><td>' + (r.signed_at || '-') + '</td>';
+        tbody.appendChild(tr);
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
