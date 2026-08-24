@@ -23,12 +23,15 @@ func Pass(store result.Store, rule RuleSet, current result.Result, operator stri
 	if verdict == VerdictFail {
 		status = result.StatusFailed
 	}
+	// Persist the QC record first. The result must not be marked passed or
+	// failed until its judgement evidence is durable, otherwise a write
+	// failure leaves a "passed" result with no reviewable QC record.
+	if err := result.SaveQCRecordRecord(store, record); err != nil {
+		return current, fmt.Errorf("persist QC record: %w", err)
+	}
 	judged, err := result.ApplyVerdict(store, current, status, record.JudgedAt)
 	if err != nil {
 		return current, err
-	}
-	if err := result.SaveQCRecordRecord(store, record); err != nil {
-		return judged, fmt.Errorf("persist QC record: %w", err)
 	}
 	return judged, nil
 }
