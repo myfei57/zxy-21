@@ -13,6 +13,12 @@ func Assign(store Store, limitStore quota.LimitStore, instrumentID string, curre
 	if current.Status != StatusPending {
 		return current, fmt.Errorf("task %s cannot be assigned from status %s", current.ID, current.Status)
 	}
+	// Gate the concurrency quota before mutating any state. A full instrument
+	// must reject the assignment outright so the task stays pending and can be
+	// routed to another instrument, instead of being queued on a full one.
+	if err := quota.Check(limitStore, instrumentID); err != nil {
+		return current, err
+	}
 	record := NewAssignmentRecord(current.ID, current.SampleID, instrumentID, operator, time.Now().UTC())
 	if err := SaveAssignmentRecord(store, record); err != nil {
 		return current, err
@@ -23,9 +29,6 @@ func Assign(store Store, limitStore quota.LimitStore, instrumentID string, curre
 	current.AssignedAt = &assignedAt
 	if err := store.SaveTask(current); err != nil {
 		return current, fmt.Errorf("persist assigned task: %w", err)
-	}
-	if err := quota.Check(limitStore, instrumentID); err != nil {
-		return current, err
 	}
 	if err := quota.Book(limitStore, instrumentID); err != nil {
 		return current, fmt.Errorf("book instrument quota: %w", err)
