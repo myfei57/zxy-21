@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>样本登记台 - LIMS</title>
+  <style>
+    body { font-family: "Microsoft YaHei", sans-serif; margin: 24px; }
+    h1 { font-size: 22px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>样本登记台</h1>
+  <table id="samples">
+    <thead>
+      <tr><th>样本ID</th><th>命名空间</th><th>患者</th><th>样本类型</th><th>状态</th><th>流转站</th><th>登记时间</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    async function load() {
+      const res = await fetch('/api/samples');
+      const rows = await res.json();
+      const tbody = document.querySelector('#samples tbody');
+      tbody.innerHTML = '';
+      for (const s of rows) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + s.id + '</td><td>' + s.namespace_id + '</td><td>' + s.patient_id +
+          '</td><td>' + s.kind + '</td><td>' + s.status + '</td><td>' + (s.current_station || '-') +
+          '</td><td>' + (s.registered_at || s.created_at) + '</td>';
+        tbody.appendChild(tr);
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
