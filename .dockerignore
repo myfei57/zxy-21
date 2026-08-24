@@ -1,0 +1,13 @@
+.git
+.gitignore
+*.jsonl
+*.zip
+*.pem
+*.key
+.verification-cache
+workspaces
+cases
+evidence
+runner
+staging
+data
