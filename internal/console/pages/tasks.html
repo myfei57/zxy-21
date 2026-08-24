@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>检测任务台 - LIMS</title>
+  <style>
+    body { font-family: "Microsoft YaHei", sans-serif; margin: 24px; }
+    h1 { font-size: 22px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>检测任务台</h1>
+  <table id="tasks">
+    <thead>
+      <tr><th>任务ID</th><th>样本</th><th>项目</th><th>仪器</th><th>状态</th><th>结果状态</th><th>分配时间</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    async function load() {
+      const res = await fetch('/api/tasks');
+      const rows = await res.json();
+      const tbody = document.querySelector('#tasks tbody');
+      tbody.innerHTML = '';
+      for (const t of rows) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + t.id + '</td><td>' + t.sample_id + '</td><td>' + t.panel +
+          '</td><td>' + (t.instrument_id || '-') + '</td><td>' + t.status + '</td><td>' + t.result_status +
+          '</td><td>' + (t.assigned_at || '-') + '</td>';
+        tbody.appendChild(tr);
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
