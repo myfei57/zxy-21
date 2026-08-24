@@ -13,15 +13,24 @@ type ResultStatusReader interface {
 }
 
 // StateFor reads the live result status instead of any cached task snapshot.
+// The task's own ResultStatus is only a fallback for results that have not been
+// created yet; once a result exists its freshly-judged status wins so the page
+// never shows a stale verdict.
 func StateFor(store Store, live ResultStatusReader, taskID string) (TaskState, error) {
 	current, err := store.LoadTask(taskID)
 	if err != nil {
 		return TaskState{}, err
 	}
+	status := current.ResultStatus
+	if current.ResultID != "" {
+		if liveStatus, err := live.LoadResultStatus(current.ResultID); err == nil {
+			status = liveStatus
+		}
+	}
 	return TaskState{
 		TaskID:       current.ID,
 		SampleID:     current.SampleID,
-		ResultStatus: current.ResultStatus,
+		ResultStatus: status,
 		UpdatedAt:    time.Now().UTC(),
 	}, nil
 }
